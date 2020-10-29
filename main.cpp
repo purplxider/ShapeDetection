@@ -9,10 +9,6 @@
 using namespace std;
 using namespace cv;
 
-
-const double PI = 3.14159265358979323846;
-
-
 void Gaussian(Mat* pSrc, Mat* pDst);
 int CornerNumDetection(Mat* image,double th);
 
@@ -82,32 +78,32 @@ void Gaussian(Mat* pSrc, Mat* pDst)
 	
 	for (int j = 2; j < pSrc->cols - 2; j++) {
 		for (int i = 2; i < pSrc->rows - 2; i++) {
-			pDst->at<uchar>(j, i) =
-				pSrc->at<uchar>(j - 2, i - 2) * mask[0][0]
-				+ pSrc->at<uchar>(j - 2, i - 1) * mask[0][1]
-				+ pSrc->at<uchar>(j - 2, i) * mask[0][2]
-				+ pSrc->at<uchar>(j - 2, i + 1) * mask[0][3]
-				+ pSrc->at<uchar>(j - 2, i + 2) * mask[0][4]
-				+ pSrc->at<uchar>(j - 1, i - 2) * mask[1][0]
-				+ pSrc->at<uchar>(j - 1, i - 1) * mask[1][1]
-				+ pSrc->at<uchar>(j - 1, i) * mask[1][2]
-				+ pSrc->at<uchar>(j - 1, i + 1) * mask[1][3]
-				+ pSrc->at<uchar>(j - 1, i + 2) * mask[1][4]
-				+ pSrc->at<uchar>(j, i - 2) * mask[2][0]
-				+ pSrc->at<uchar>(j, i - 1) * mask[2][1]
-				+ pSrc->at<uchar>(j, i) * mask[2][2]
-				+ pSrc->at<uchar>(j, i + 1) * mask[2][3]
-				+ pSrc->at<uchar>(j, i + 2) * mask[2][4]
-				+ pSrc->at<uchar>(j + 1, i - 2) * mask[3][0]
-				+ pSrc->at<uchar>(j + 1, i - 1) * mask[3][1]
-				+ pSrc->at<uchar>(j + 1, i) * mask[3][2]
-				+ pSrc->at<uchar>(j + 1, i + 1) * mask[3][3]
-				+ pSrc->at<uchar>(j + 1, i + 2) * mask[3][4]
-				+ pSrc->at<uchar>(j + 2, i - 2) * mask[4][0]
-				+ pSrc->at<uchar>(j + 2, i - 1) * mask[4][1]
-				+ pSrc->at<uchar>(j + 2, i) * mask[4][2]
-				+ pSrc->at<uchar>(j + 2, i + 1) * mask[4][3]
-				+ pSrc->at<uchar>(j + 2, i + 2) * mask[4][4];
+			pDst->at<double>(j, i) =
+				pSrc->at<double>(j - 2, i - 2) * mask[0][0]
+				+ pSrc->at<double>(j - 2, i - 1) * mask[0][1]
+				+ pSrc->at<double>(j - 2, i) * mask[0][2]
+				+ pSrc->at<double>(j - 2, i + 1) * mask[0][3]
+				+ pSrc->at<double>(j - 2, i + 2) * mask[0][4]
+				+ pSrc->at<double>(j - 1, i - 2) * mask[1][0]
+				+ pSrc->at<double>(j - 1, i - 1) * mask[1][1]
+				+ pSrc->at<double>(j - 1, i) * mask[1][2]
+				+ pSrc->at<double>(j - 1, i + 1) * mask[1][3]
+				+ pSrc->at<double>(j - 1, i + 2) * mask[1][4]
+				+ pSrc->at<double>(j, i - 2) * mask[2][0]
+				+ pSrc->at<double>(j, i - 1) * mask[2][1]
+				+ pSrc->at<double>(j, i) * mask[2][2]
+				+ pSrc->at<double>(j, i + 1) * mask[2][3]
+				+ pSrc->at<double>(j, i + 2) * mask[2][4]
+				+ pSrc->at<double>(j + 1, i - 2) * mask[3][0]
+				+ pSrc->at<double>(j + 1, i - 1) * mask[3][1]
+				+ pSrc->at<double>(j + 1, i) * mask[3][2]
+				+ pSrc->at<double>(j + 1, i + 1) * mask[3][3]
+				+ pSrc->at<double>(j + 1, i + 2) * mask[3][4]
+				+ pSrc->at<double>(j + 2, i - 2) * mask[4][0]
+				+ pSrc->at<double>(j + 2, i - 1) * mask[4][1]
+				+ pSrc->at<double>(j + 2, i) * mask[4][2]
+				+ pSrc->at<double>(j + 2, i + 1) * mask[4][3]
+				+ pSrc->at<double>(j + 2, i + 2) * mask[4][4];
 		}
 	}
 }
