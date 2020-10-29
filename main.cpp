@@ -4,47 +4,65 @@
 #include<iomanip>
 #include "opencv2\highgui\highgui.hpp"
 #include "opencv2\core\core.hpp"
-
-using namespace std;
-using namespace cv;
-
-#include "stdafx.h"
 #include <opencv2\opencv.hpp>
 
-using namespace cv;
 using namespace std;
+using namespace cv;
+
 
 const double PI = 3.14159265358979323846;
 
 
 void GaussianFiltering(Mat* pSrc, Mat* pDst, double sigma);
-void HarrisCornerDetection(Mat* image, vector<Point>* corners, double th);
+void CornerNumDetection(Mat* image,double th);
 
-int main()
-{
-	Mat image = imread("../_res/harris_test.bmp", IMREAD_GRAYSCALE);
-	CV_Assert(!image.empty());
+int main() {
+	Mat image[4];
+	image[0] = imread("1.jpg");
+	image[1] = imread("2.jpg");
+	//image[2] = imread("3.jpg");
+	//image[3] = imread("4.jpg");
+	double R, G, B, gray;
+	int numimage = 2;
 
-	Mat cornerimage(image.size(), CV_8UC3);
-	cvtColor(image, cornerimage, CV_GRAY2BGR);
+
+	for (int z = 0; z < numimage; z++) {
+
+		for (int j = 0; j < image[z].rows; j++) {
+			for (int i = 0; i < image[z].cols; i++) {
+				R = image[z].at<cv::Vec3b>(j, i)[2];
+				G = image[z].at<cv::Vec3b>(j, i)[1];
+				B = image[z].at<cv::Vec3b>(j, i)[0];
+				gray = (R + G + B) / 3;
+				image[z].at<cv::Vec3b>(j, i)[2] = gray;
+				image[z].at<cv::Vec3b>(j, i)[1] = gray;
+				image[z].at<cv::Vec3b>(j, i)[0] = gray;
+
+			}
+		}
+	}
+	int corner[4];
 
 	double th = 20000;
-	vector<Point> vecCorner;
-	HarrisCornerDetection(&image, &vecCorner, th);
+	for (int i = 0; i < numimage; i++) {
+		corner[i] = CornerNumDetection(&image[i], 20000);
 
-	// 코너 그리기
-	for (int l = 0; l < (int)vecCorner.size(); l++)
-	{
-		circle(cornerimage, vecCorner[l], 3, Scalar(255, 0, 0), CV_FILLED);
+		if (corner[i] == 3) {
+			cout << i << " object is Triangle" << endl;
+		}
+		else if (corner[i] == 4) {
+			cout << i << " object is Square" << endl;
+		}
 	}
 
-	imshow("Input Image", image);
-	imshow("Harris Corner Image", cornerimage);
 
-	waitKey(0);
-
+	imshow("image1", image[0]);
+	imshow("image", image[1]);
+	waitKey();
 	return 0;
 }
+
+
 
 
 void GaussianFiltering(Mat* pSrc, Mat* pDst, double sigma)
@@ -55,36 +73,35 @@ void GaussianFiltering(Mat* pSrc, Mat* pDst, double sigma)
 	GaussianBlur(*pSrc, *pDst, Size(dim, dim), sigma, sigma);
 }
 
-
-void HarrisCornerDetection(Mat* image, vector<Point>* corners, double th)
+//harrisconerdection algorithm 사용
+int CornerNumDetection(Mat* image, double th)
 {
 	int i, j, x, y;
 
-	int w = image->cols;
-	int h = image->rows;
-
-
-	//-------------------------------------------------------------------------
-	// 1. (fx)*(fx), (fx)*(fy), (fy)*(fy) 계산
-	//-------------------------------------------------------------------------
-	Mat imagedx2(image->size(), CV_64F, Scalar(0));
-	Mat imagedy2(image->size(), CV_64F, Scalar(0));
-	Mat imagedxy(image->size(), CV_64F, Scalar(0));
+	int w = image->cols; //width
+	int h = image->rows; //height
+	//newimage
+	Mat imagex2, imagey2, imagexy;
+	Mat imagex2(image->size(), CV_64F, Scalar(0));
+	Mat imagey2(image->size(), CV_64F, Scalar(0));
+	Mat imagexy(image->size(), CV_64F, Scalar(0));
 
 	double tx, ty;
-	for (j = 1; j < h - 1; j++)
+	for (j = 1; j < h - 1; j++) // width
 	{
-		for (i = 1; i < w - 1; i++)
+		for (i = 1; i < w - 1; i++) // height
 		{
+			// 1. (fx)*(fx), (fx)*(fy), (fy)*(fy) 계산
+
 			tx = (image->at<uchar>(j - 1, i + 1) + image->at<uchar>(j, i + 1) + image->at<uchar>(j + 1, i + 1)
-				- image->at<uchar>(j - 1, i - 1) - image->at<uchar>(j, i - 1) - image->at<uchar>(j + 1, i - 1)) / 6.0;
+				- image->at<uchar>(j - 1, i - 1) - image->at<uchar>(j, i - 1) - image->at<uchar>(j + 1, i - 1)) / 6.f;
 
 			ty = (image->at<uchar>(j + 1, i - 1) + image->at<uchar>(j + 1, i) + image->at<uchar>(j + 1, i + 1)
-				- image->at<uchar>(j - 1, i - 1) - image->at<uchar>(j - 1, i) - image->at<uchar>(j - 1, i + 1)) / 6.0;
+				- image->at<uchar>(j - 1, i - 1) - image->at<uchar>(j - 1, i) - image->at<uchar>(j - 1, i + 1)) / 6.f;
 
-			imagedx2.at<double>(j, i) = tx * tx;
-			imagedy2.at<double>(j, i) = ty * ty;
-			imagedxy.at<double>(j, i) = tx * ty;
+			imagex2.at<double>(j, i) = tx * tx;
+			imagey2.at<double>(j, i) = ty * ty;
+			imagexy.at<double>(j, i) = tx * ty;
 		}
 	}
 
@@ -96,75 +113,45 @@ void HarrisCornerDetection(Mat* image, vector<Point>* corners, double th)
 	Mat imageGdx2(image->size(), CV_64F, Scalar(0));
 	Mat imageGdy2(image->size(), CV_64F, Scalar(0));
 	Mat imageGdxy(image->size(), CV_64F, Scalar(0));
-	GaussianFiltering(&imagedx2, &imageGdx2, sigma);
-	GaussianFiltering(&imagedy2, &imageGdy2, sigma);
-	GaussianFiltering(&imagedxy, &imageGdxy, sigma);
+	GaussianFiltering(&imagex2, &imageGdx2, sigma);
+	GaussianFiltering(&imagey2, &imageGdy2, sigma);
+	GaussianFiltering(&imagexy, &imageGdxy, sigma);
 
 
-	//-------------------------------------------------------------------------
-	// 3. 코너 응답 함수 생성
-	//-------------------------------------------------------------------------
-	Mat crf(image->size(), CV_64F, Scalar(0));
-	double k = 0.04;
+	Mat newimage(image->size(), CV_64F, Scalar(0));
+	double k = 0.04; // k = 0.04 ~ 0.06
 	for (j = 2; j < h - 2; j++)
 	{
 		for (i = 2; i < w - 2; i++)
 		{
-			crf.at<double>(j, i) = (imageGdx2.at<double>(j, i) * imageGdy2.at<double>(j, i) - imageGdxy.at<double>(j, i) * imageGdxy.at<double>(j, i))
+			//필터링한 이미지를 해리스 코너 검출기를 통해 새로운이미지 생성
+			//newimage = det(i1 * i2) - k * (i1+i2)
+			newimage.at<double>(j, i) = (imageGdx2.at<double>(j, i) * imageGdy2.at<double>(j, i)
+				- imageGdxy.at<double>(j, i) * imageGdxy.at<double>(j, i))
 				- k * (imageGdx2.at<double>(j, i) + imageGdy2.at<double>(j, i)) * (imageGdx2.at<double>(j, i) + imageGdy2.at<double>(j, i));
 
 		}
 	}
 
-	//-------------------------------------------------------------------------
-	// 4. 임계값보다 큰 국지적 최대값을 찾아 코너 포인트로 결정
-	//-------------------------------------------------------------------------
+
+	int corners = 0;
 	double cvf_value = 0;
 	for (j = 2; j < h - 2; j++)
 	{
 		for (i = 2; i < w - 2; i++)
 		{
-			cvf_value = crf.at<double>(j, i);
+			cvf_value = newimage.at<double>(j, i);
 			if (cvf_value > th)
 			{
-				if (cvf_value > crf.at<double>(j - 1, i) && cvf_value > crf.at<double>(j - 1, i + 1) &&
-					cvf_value > crf.at<double>(j, i + 1) && cvf_value > crf.at<double>(j + 1, i + 1) &&
-					cvf_value > crf.at<double>(j + 1, i) && cvf_value > crf.at<double>(j + 1, i - 1) &&
-					cvf_value > crf.at<double>(j, i - 1) && cvf_value > crf.at<double>(j - 1, i - 1))
+				if (cvf_value > newimage.at<double>(j - 1, i) && cvf_value > newimage.at<double>(j - 1, i + 1) &&
+					cvf_value > newimage.at<double>(j, i + 1) && cvf_value > newimage.at<double>(j + 1, i + 1) &&
+					cvf_value > newimage.at<double>(j + 1, i) && cvf_value > newimage.at<double>(j + 1, i - 1) &&
+					cvf_value > newimage.at<double>(j, i - 1) && cvf_value > newimage.at<double>(j - 1, i - 1))
 				{
-					corners->push_back(Point(i, j));
+					corners++;
 				}
 			}
 		}
 	}
-}
-
-int main() {
-    Mat image[4];
-    image[0] = imread("1.jpg");
-    image[1] = imread("2.jpg");
-    //image[2] = imread("3.jpg");
-    //image[3] = imread("4.jpg");
-    double R, G, B, gray;
-    for (int z = 0; z < 2 ; z++) {
-
-        for (int j = 0; j < image[z].rows ; j++) {
-            for (int i = 0; i < image[z].cols; i++) {
-                R = image[z].at<cv::Vec3b>(j, i)[2];
-                G = image[z].at<cv::Vec3b>(j, i)[1];
-                B = image[z].at<cv::Vec3b>(j, i)[0];
-                gray = (R + G + B )/3;
-                image[z].at<cv::Vec3b>(j, i)[2] = gray;
-                image[z].at<cv::Vec3b>(j, i)[1] = gray;
-                image[z].at<cv::Vec3b>(j, i)[0] = gray;
-
-            }
-        }
-    }
-
-
-    imshow("image1", image[0]);
-    imshow("image", image[1]);
-    waitKey();
-    return 0;
+	return corners;
 }
