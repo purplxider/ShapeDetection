@@ -13,13 +13,13 @@ using namespace cv;
 const double PI = 3.14159265358979323846;
 
 
-void GaussianFiltering(Mat* pSrc, Mat* pDst, double sigma);
-void CornerNumDetection(Mat* image,double th);
+void Gaussian(Mat* pSrc, Mat* pDst);
+int CornerNumDetection(Mat* image,double th);
 
 int main() {
 	Mat image[4];
-	image[0] = imread("1.jpg");
-	image[1] = imread("2.jpg");
+	image[0] = imread("c:\Nexon\1.jpg");
+	image[1] = imread("c:\Nexon\2.jpg");
 	//image[2] = imread("3.jpg");
 	//image[3] = imread("4.jpg");
 	double R, G, B, gray;
@@ -120,7 +120,7 @@ int CornerNumDetection(Mat* image, double th)
 	int w = image->cols; //width
 	int h = image->rows; //height
 	//newimage
-	Mat imagex2, imagey2, imagexy;
+	//Mat imagex2, imagey2, imagexy;
 	Mat imagex2(image->size(), CV_64F, Scalar(0));
 	Mat imagey2(image->size(), CV_64F, Scalar(0));
 	Mat imagexy(image->size(), CV_64F, Scalar(0));
