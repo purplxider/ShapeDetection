@@ -14,29 +14,13 @@ int CornerNumDetection(Mat* image,double th);
 
 int main() {
 	Mat image[4];
-	image[0] = imread("c:\Nexon\1.jpg");
-	image[1] = imread("c:\Nexon\2.jpg");
-	//image[2] = imread("3.jpg");
-	//image[3] = imread("4.jpg");
+	image[0] = imread("1.jpg", IMREAD_GRAYSCALE);
+	image[1] = imread("2.jpg", IMREAD_GRAYSCALE);
+	image[2] = imread("3.jpg", IMREAD_GRAYSCALE);
+	image[3] = imread("4.jpg", IMREAD_GRAYSCALE);
 	double R, G, B, gray;
-	int numimage = 2;
+	int numimage = 4;
 
-
-	for (int z = 0; z < numimage; z++) {
-
-		for (int j = 0; j < image[z].rows; j++) {
-			for (int i = 0; i < image[z].cols; i++) {
-				R = image[z].at<cv::Vec3b>(j, i)[2];
-				G = image[z].at<cv::Vec3b>(j, i)[1];
-				B = image[z].at<cv::Vec3b>(j, i)[0];
-				gray = (R + G + B) / 3;
-				image[z].at<cv::Vec3b>(j, i)[2] = gray;
-				image[z].at<cv::Vec3b>(j, i)[1] = gray;
-				image[z].at<cv::Vec3b>(j, i)[0] = gray;
-
-			}
-		}
-	}
 	int corner[4];
 
 	double th = 20000;
@@ -63,7 +47,7 @@ int main() {
 
 void Gaussian(Mat* pSrc, Mat* pDst)
 {
-	int mask[5][5] = {
+	double mask[5][5] = {
 		{1, 4, 6, 4, 1},
 		{4, 16, 24, 16, 4},
 		{6, 24, 36, 24, 6},
@@ -116,7 +100,6 @@ int CornerNumDetection(Mat* image, double th)
 	int w = image->cols; //width
 	int h = image->rows; //height
 	//newimage
-	//Mat imagex2, imagey2, imagexy;
 	Mat imagex2(image->size(), CV_64F, Scalar(0));
 	Mat imagey2(image->size(), CV_64F, Scalar(0));
 	Mat imagexy(image->size(), CV_64F, Scalar(0));
@@ -149,7 +132,6 @@ int CornerNumDetection(Mat* image, double th)
 	Gaussian(&imagey2, &imageGdy2);
 	Gaussian(&imagexy, &imageGdxy);
 
-
 	Mat newimage(image->size(), CV_64F, Scalar(0));
 	double k = 0.04; // k = 0.04 ~ 0.06
 	for (j = 2; j < h - 2; j++)
@@ -164,8 +146,6 @@ int CornerNumDetection(Mat* image, double th)
 
 		}
 	}
-
-
 	int corners = 0;
 	double cvf_value = 0;
 	for (j = 2; j < h - 2; j++)
