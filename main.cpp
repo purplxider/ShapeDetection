@@ -65,12 +65,51 @@ int main() {
 
 
 
-void GaussianFiltering(Mat* pSrc, Mat* pDst, double sigma)
+void Gaussian(Mat* pSrc, Mat* pDst)
 {
-	int dim = static_cast<int>(8 * sigma + 1.0);
-	if (dim < 3) dim = 3;
-	if (dim % 2 == 0) dim++;
-	GaussianBlur(*pSrc, *pDst, Size(dim, dim), sigma, sigma);
+	int mask[5][5] = {
+		{1, 4, 6, 4, 1},
+		{4, 16, 24, 16, 4},
+		{6, 24, 36, 24, 6},
+		{4, 16, 24, 16, 4},
+		{1, 4, 6, 4, 1} };
+
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++) {
+			mask[i][j] /= 256;
+		}
+	}
+	
+	for (int j = 2; j < pSrc->cols - 2; j++) {
+		for (int i = 2; i < pSrc->rows - 2; i++) {
+			pDst->at<uchar>(j, i) =
+				pSrc->at<uchar>(j - 2, i - 2) * mask[0][0]
+				+ pSrc->at<uchar>(j - 2, i - 1) * mask[0][1]
+				+ pSrc->at<uchar>(j - 2, i) * mask[0][2]
+				+ pSrc->at<uchar>(j - 2, i + 1) * mask[0][3]
+				+ pSrc->at<uchar>(j - 2, i + 2) * mask[0][4]
+				+ pSrc->at<uchar>(j - 1, i - 2) * mask[1][0]
+				+ pSrc->at<uchar>(j - 1, i - 1) * mask[1][1]
+				+ pSrc->at<uchar>(j - 1, i) * mask[1][2]
+				+ pSrc->at<uchar>(j - 1, i + 1) * mask[1][3]
+				+ pSrc->at<uchar>(j - 1, i + 2) * mask[1][4]
+				+ pSrc->at<uchar>(j, i - 2) * mask[2][0]
+				+ pSrc->at<uchar>(j, i - 1) * mask[2][1]
+				+ pSrc->at<uchar>(j, i) * mask[2][2]
+				+ pSrc->at<uchar>(j, i + 1) * mask[2][3]
+				+ pSrc->at<uchar>(j, i + 2) * mask[2][4]
+				+ pSrc->at<uchar>(j + 1, i - 2) * mask[3][0]
+				+ pSrc->at<uchar>(j + 1, i - 1) * mask[3][1]
+				+ pSrc->at<uchar>(j + 1, i) * mask[3][2]
+				+ pSrc->at<uchar>(j + 1, i + 1) * mask[3][3]
+				+ pSrc->at<uchar>(j + 1, i + 2) * mask[3][4]
+				+ pSrc->at<uchar>(j + 2, i - 2) * mask[4][0]
+				+ pSrc->at<uchar>(j + 2, i - 1) * mask[4][1]
+				+ pSrc->at<uchar>(j + 2, i) * mask[4][2]
+				+ pSrc->at<uchar>(j + 2, i + 1) * mask[4][3]
+				+ pSrc->at<uchar>(j + 2, i + 2) * mask[4][4];
+		}
+	}
 }
 
 //harrisconerdection algorithm 사용
@@ -106,16 +145,13 @@ int CornerNumDetection(Mat* image, double th)
 	}
 
 
-	//-------------------------------------------------------------------------
-	// 2. 가우시안 필터링
-	//-------------------------------------------------------------------------
-	double sigma = 1.0;
+	// 필터로 가우시안 블러 적용
 	Mat imageGdx2(image->size(), CV_64F, Scalar(0));
 	Mat imageGdy2(image->size(), CV_64F, Scalar(0));
 	Mat imageGdxy(image->size(), CV_64F, Scalar(0));
-	GaussianFiltering(&imagex2, &imageGdx2, sigma);
-	GaussianFiltering(&imagey2, &imageGdy2, sigma);
-	GaussianFiltering(&imagexy, &imageGdxy, sigma);
+	Gaussian(&imagex2, &imageGdx2);
+	Gaussian(&imagey2, &imageGdy2);
+	Gaussian(&imagexy, &imageGdxy);
 
 
 	Mat newimage(image->size(), CV_64F, Scalar(0));
