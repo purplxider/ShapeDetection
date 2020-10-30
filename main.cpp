@@ -15,23 +15,21 @@ int CornerNumDetection(Mat* image, double th);
 int main() {
     Mat image[4],image_gray[4];
     image[0] = imread("1.jpg");
-    //image[1] = imread("2.jpg", IMREAD_GRAYSCALE);
-    //image[2] = imread("3.jpg", IMREAD_GRAYSCALE);
-    //image[3] = imread("4.jpg", IMREAD_GRAYSCALE);
+    image[1] = imread("2.jpg");
+    image[2] = imread("3.jpg");
+    image[3] = imread("4.jpg");
     float R, G, B, gray;
     int numimage = 4;
 
-
     /// Convert to gray
     float fGray = 0.0f;
-
     for (int z = 0; z < numimage; z++) {
 
         image[z].copyTo(image_gray[z]);
 
         int nRows = image[z].rows;
         int nCols = image[z].cols;
-
+        
         for (int j = 0; j < nRows; j++) {
 
             for (int i = 0; i < nCols; i++) {
@@ -40,7 +38,7 @@ int main() {
                 G = (float)(image[z].at<cv::Vec3b>(j, i)[1]);
                 R = (float)(image[z].at<cv::Vec3b>(j, i)[2]);
 
-                fGray = 0.2126f * B + 0.7152f * G + 0.0722f * R;
+                fGray = 0.114f * B + 0.587f * G + 0.299f * R;
 
                 if (fGray < 0.0) fGray = 0.0f;
                 if (fGray > 255.0) fGray = 255.0f;
@@ -48,18 +46,17 @@ int main() {
                 image_gray[z].at<cv::Vec3b>(j, i)[0] = (int)fGray;
                 image_gray[z].at<cv::Vec3b>(j, i)[1] = (int)fGray;
                 image_gray[z].at<cv::Vec3b>(j, i)[2] = (int)fGray;
-
             }
 
         }
+
     }
-    imshow("show", image_gray[0]);
+    //imshow("show", image_gray[0]);
     int corner[4];
 
     double th = 20000;
     for (int i = 0; i < numimage; i++) {
         corner[i] = CornerNumDetection(&image_gray[i], 20000);
-
         if (corner[i] == 3) {
             cout << i << " object is Triangle" << endl;
         }
@@ -140,18 +137,17 @@ int CornerNumDetection(Mat* image, double th)
         {
             // 해리스코너검출식 사용
             // 주변의 픽셀들의 평균 구하기
-            tx = (image->at<uchar>(j - 1, i + 1) + image->at<uchar>(j, i + 1) + image->at<uchar>(j + 1, i + 1)
-                - image->at<uchar>(j - 1, i - 1) - image->at<uchar>(j, i - 1) - image->at<uchar>(j + 1, i - 1)) / 6.f;
+            tx = (image->at<Vec3b>(j - 1, i + 1)[0] + image->at<Vec3b>(j, i + 1)[0] + image->at<Vec3b>(j + 1, i + 1)[0]
+                - image->at<Vec3b>(j - 1, i - 1)[0] - image->at<Vec3b>(j, i - 1)[0] - image->at<Vec3b>(j + 1, i - 1)[0]) / 6.f;
 
-            ty = (image->at<uchar>(j + 1, i - 1) + image->at<uchar>(j + 1, i) + image->at<uchar>(j + 1, i + 1)
-                - image->at<uchar>(j - 1, i - 1) - image->at<uchar>(j - 1, i) - image->at<uchar>(j - 1, i + 1)) / 6.f;
+            ty = (image->at<Vec3b>(j + 1, i - 1)[0] + image->at<Vec3b>(j + 1, i)[0] + image->at<Vec3b>(j + 1, i + 1)[0]
+                - image->at<Vec3b>(j - 1, i - 1)[0] - image->at<Vec3b>(j - 1, i)[0] - image->at<Vec3b>(j - 1, i + 1)[0]) / 6.f;
 
             imagex2.at<double>(j, i) = tx * tx;
             imagey2.at<double>(j, i) = ty * ty;
             imagexy.at<double>(j, i) = tx * ty;
         }
     }
-
 
     // 필터로 가우시안 블러 적용
     Mat filteredImagex2(image->size(), CV_64F, Scalar(0));
@@ -171,7 +167,7 @@ int CornerNumDetection(Mat* image, double th)
             //newimage = det(i1 * i2) - k * (i1+i2)
             newimage.at<double>(j, i) = (filteredImagex2.at<double>(j, i) * filteredImagey2.at<double>(j, i)
                 - filteredImagexy.at<double>(j, i) * filteredImagexy.at<double>(j, i))
-                - k * (filteredImagex2.at<double>(j, i) + filteredImagey2.at<double>(j, i)) * (filteredImagexy.at<double>(j, i) + filteredImagey2.at<double>(j, i));
+                - k * (filteredImagex2.at<double>(j, i) + filteredImagey2.at<double>(j, i)) * (filteredImagex2.at<double>(j, i) + filteredImagey2.at<double>(j, i));
 
         }
     }
