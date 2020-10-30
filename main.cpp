@@ -10,33 +10,33 @@ using namespace std;
 using namespace cv;
 
 void Gaussian(Mat* pSrc, Mat* pDst);
-int CornerNumDetection(Mat* image,double th);
+
+int CornerNumDetection(Mat* image, double th);
 
 int main() {
-	Mat image[4];
-	image[0] = imread("1.jpg", IMREAD_GRAYSCALE);
-	image[1] = imread("2.jpg", IMREAD_GRAYSCALE);
-	image[2] = imread("3.jpg", IMREAD_GRAYSCALE);
-	image[3] = imread("4.jpg", IMREAD_GRAYSCALE);
-	double R, G, B, gray;
-	int numimage = 4;
+    Mat image[4];
+    image[0] = imread("1.jpg", IMREAD_GRAYSCALE);
+    image[1] = imread("2.jpg", IMREAD_GRAYSCALE);
+    image[2] = imread("3.jpg", IMREAD_GRAYSCALE);
+    image[3] = imread("4.jpg", IMREAD_GRAYSCALE);
+    double R, G, B, gray;
+    int numimage = 4;
 
-	int corner[4];
+    int corner[4];
 
-	double th = 20000;
-	for (int i = 0; i < numimage; i++) {
-		corner[i] = CornerNumDetection(&image[i], 20000);
+    double th = 20000;
+    for (int i = 0; i < numimage; i++) {
+        corner[i] = CornerNumDetection(&image[i], 20000);
 
-		if (corner[i] == 3) {
-			cout << i << " object is Triangle" << endl;
-		}
-		else if (corner[i] == 4) {
-			cout << i << " object is Square" << endl;
-		}
-	}
+        if (corner[i] == 3) {
+            cout << i << " object is Triangle" << endl;
+        }
+        else if (corner[i] == 4) {
+            cout << i << " object is Square" << endl;
+        }
+    }
 
-	waitKey();
-	return 0;
+    return 0;
 }
 
 
@@ -89,7 +89,7 @@ void Gaussian(Mat* pSrc, Mat* pDst)
 	}
 }
 
-//harrisconerdection algorithm »ç¿ë
+//harrisconerdection algorithm ì‚¬ìš©
 int CornerNumDetection(Mat* image, double th)
 {
 	int i, j, x, y;
@@ -106,7 +106,7 @@ int CornerNumDetection(Mat* image, double th)
 	{
 		for (i = 1; i < w - 1; i++) // height
 		{
-			// 1. (fx)*(fx), (fx)*(fy), (fy)*(fy) °è»ê
+			// 1. (fx)*(fx), (fx)*(fy), (fy)*(fy) ê³„ì‚°
 
 			tx = (image->at<uchar>(j - 1, i + 1) + image->at<uchar>(j, i + 1) + image->at<uchar>(j + 1, i + 1)
 				- image->at<uchar>(j - 1, i - 1) - image->at<uchar>(j, i - 1) - image->at<uchar>(j + 1, i - 1)) / 6.f;
@@ -121,7 +121,7 @@ int CornerNumDetection(Mat* image, double th)
 	}
 
 
-	// ÇÊÅÍ·Î °¡¿ì½Ã¾È ºí·¯ Àû¿ë
+	// í•„í„°ë¡œ ê°€ìš°ì‹œì•ˆ ë¸”ëŸ¬ ì ìš©
 	Mat imageGdx2(image->size(), CV_64F, Scalar(0));
 	Mat imageGdy2(image->size(), CV_64F, Scalar(0));
 	Mat imageGdxy(image->size(), CV_64F, Scalar(0));
@@ -135,7 +135,7 @@ int CornerNumDetection(Mat* image, double th)
 	{
 		for (i = 2; i < w - 2; i++)
 		{
-			//ÇÊÅÍ¸µÇÑ ÀÌ¹ÌÁö¸¦ ÇØ¸®½º ÄÚ³Ê °ËÃâ±â¸¦ ÅëÇØ »õ·Î¿îÀÌ¹ÌÁö »ý¼º
+			//í•„í„°ë§í•œ ì´ë¯¸ì§€ë¥¼ í•´ë¦¬ìŠ¤ ì½”ë„ˆ ê²€ì¶œê¸°ë¥¼ í†µí•´ ìƒˆë¡œìš´ì´ë¯¸ì§€ ìƒì„±
 			//newimage = det(i1 * i2) - k * (i1+i2)
 			newimage.at<double>(j, i) = (imageGdx2.at<double>(j, i) * imageGdy2.at<double>(j, i)
 				- imageGdxy.at<double>(j, i) * imageGdxy.at<double>(j, i))
