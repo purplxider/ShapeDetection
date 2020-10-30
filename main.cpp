@@ -122,12 +122,12 @@ int CornerNumDetection(Mat* image, double th)
 
 
 	// 필터로 가우시안 블러 적용
-	Mat imageGdx2(image->size(), CV_64F, Scalar(0));
-	Mat imageGdy2(image->size(), CV_64F, Scalar(0));
-	Mat imageGdxy(image->size(), CV_64F, Scalar(0));
-	Gaussian(&imagex2, &imageGdx2);
-	Gaussian(&imagey2, &imageGdy2);
-	Gaussian(&imagexy, &imageGdxy);
+	Mat filteredImagex2(image->size(), CV_64F, Scalar(0));
+	Mat filteredImagey2(image->size(), CV_64F, Scalar(0));
+	Mat filteredImagexy(image->size(), CV_64F, Scalar(0));
+	Gaussian(&imagex2, &filteredImagex2);
+	Gaussian(&imagey2, &filteredImagey2);
+	Gaussian(&imagexy, &filteredImagexy);
 
 	Mat newimage(image->size(), CV_64F, Scalar(0));
 	double k = 0.04; // k = 0.04 ~ 0.06
@@ -137,9 +137,9 @@ int CornerNumDetection(Mat* image, double th)
 		{
 			//필터링한 이미지를 해리스 코너 검출기를 통해 새로운이미지 생성
 			//newimage = det(i1 * i2) - k * (i1+i2)
-			newimage.at<double>(j, i) = (imageGdx2.at<double>(j, i) * imageGdy2.at<double>(j, i)
-				- imageGdxy.at<double>(j, i) * imageGdxy.at<double>(j, i))
-				- k * (imageGdx2.at<double>(j, i) + imageGdy2.at<double>(j, i)) * (imageGdx2.at<double>(j, i) + imageGdy2.at<double>(j, i));
+			newimage.at<double>(j, i) = (filteredImagex2.at<double>(j, i) * filteredImagey2.at<double>(j, i)
+				- filteredImagexy.at<double>(j, i) * filteredImagexy.at<double>(j, i))
+				- k * (filteredImagex2.at<double>(j, i) + filteredImagey2.at<double>(j, i)) * (filteredImagexy.at<double>(j, i) + filteredImagey2.at<double>(j, i));
 
 		}
 	}
